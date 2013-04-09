@@ -10,33 +10,17 @@ import numpy as np
 import math
 import vcf
 import fnmatch
+from optparse import OptionParser
 
 
-#try:	
-#	file_map = sys.argv[1];dir_files_phenotype1 = sys.argv[2];dir_files_phenotype2 = sys.argv[3];outfilename = sys.argv[4]
-
-#except:
-#     print "Usage:",sys.argv[0], "file.map dir_files_phenotype1 dir_files_phenotype2 outfile";sys.exit(1)
-
-
-
-file_map="/home/cristovao/Desktop/AUS_project/public_datas/opensnp_datadump.201303070733/phenotypes_201303070733.csv"
-
-folder="/home/cristovao/Desktop/AUS_project/public_datas/opensnp_datadump.201303070733"
-
-
-def get_dataset():
+def get_dataset(inputfile):
     """return """
-    handle = csv.DictReader(open(file_map, "r"),
-            #fieldnames=["user_id","date_of_birth","chrom_sex","Jewish Ancestry","Subjective dream intensity","Webbed toes","Dyslexia","Artistic ability","lips size","ethnicity","Acrophobia","Myers-Briggs Type Indicator","Irritable Bowel Syndrome","Diego Blood Group","Cholesterol","Moles raised","Autism","Interest in Spirituality and Mysticism","Physician-diagnosed celiac/coeliac disease","Hypertriglyceridemia","SAT Writing","Panic Disorder","Bone Mineral Density","Sexual Preferences","Energy Level","Faktor 5 Leiden (F5)","Age learned to read","ear proximity to head ","Atheism","Earwax type","ring finger longer than index finger","Eye with Blue Halo ","Beard Color","Birth year","Migraine frequency","Serotonin transporter","Sport interest","Number of toes","Number of wisdom teeth","Widow's Peak","natural skinny","Wake up preference","Lisp","Do you like the taste of hops?","Wanting to be immortal","Purposefulness ","Ambition","Do hops taste like soap?","ABH Blood Group (antigens) ","Fish Preference","Smell of coffee in urine","hair on fingers","Neanderthal","Are You The Advertising Phenotype?","(male) penis releases pre-cum when sexually aroused.","Morton's Toe","Sports interest","Does cilantro taste like soap to you?","Tongue roller","Enjoy watching TV","Aspirin Allergy","libido ","Blood type","First word","Enjoy using the Internet","mtDNA Haplogroup (PhyloTree)","Like the taste of Stevia","Negative reaction to fluoroquinolone antibiotics","white skin","Fat-pad knee syndrome","Ability to Tan","Strabismus","Amblyopia","Autoimmune disorder","Y-DNA Haplogroup (ISOGG)","Asthma","Freckling","form of the nose","Ancestry","Metabolic Syndrome [MetS]","Enjoy riding a motorbike","Hair Color","Tea consumption","Height","Sex","Motion sickness","Cystic Fibrosis Like Disease","mouth size","Peanut butter preference","Sneezing induced by sexual ideation or orgasm?","Woolnerian Tip (Darwin's Tubercle)","SAT Math","prognathism","Taste of broccoli","Jogger","Phobia","Kell Blood Group (K/k antigens)  ","Desmoid Tumor","SAT Verbal","Astigmatism","excessive daytime sleepiness","Enjoy driving a car","ABO Rh ","Kidd Blood Group","Sense of smell","apthous in mouth tendency","Allergic/bad reaction to fish oil supplements","Interested in news from real newspaper / news from the Internet","erectil disfunction ","Index Toe Longer than Big Toe","Hair Type","Penis Circumference at Glans","Penis Length","Intolerance: gluten, casein, soy","Weight","Short-sightedness (Myopia)","brown hair colour","SAT - when taken","Anorgasmia","Nicotine dependence","CMV serostatus","Musical Perfect Pitch","Rheumatoid Arthritis","(Male) Nipple's size","ADHD","Insect bites and stings","Colour Blindness","Lactose intolerance","Have ME/CFS","Atypical Sulfonomide Antibiotic Reaction","Cramps","Political Ideology","Handedness","cluster headache","Eye color","Social Level","Earlobe:  Free or attached","Photic Sneeze Reflex (Photoptarmis)","Coffee consumption","Penicillin reaction","Do you have a parent who was diagnosed with Alzheimer's disease?","R1b1a2a1a1b","Good / poor eater as child","Abnormal Blood Pressure","Type II Diabetes","Migraine","Colon cancer ONLY FOR (rs3219489 GG)!","Ability to find a bug in openSNP","Eurogenes","head form","Cleverness","ENTP","Can you smell cut-grass?","Asparagus Metabolite Detection"],
-        delimiter=";")
-
+    handle = csv.DictReader(open(inputfile, "r"), delimiter=";")
     return handle
 
-
-def get_user(pheno, variation):
+def get_user(pheno, variation,inputfile):
     """Return list of the user with a specific variation """
-    dataset = get_dataset()
+    dataset = get_dataset(inputfile)
     user_list = []
     for i in dataset:
         if i[pheno] == variation:
@@ -45,17 +29,11 @@ def get_user(pheno, variation):
     return user_list
 
 
-
-
-
-def create_dir(user_list,variation):
+def create_dir(user_list,variation,folder):
     """Create a folder from a list of the user"""
     user_list=list(set(user_list))
     print "total of the user", len(user_list), user_list
     files= os.listdir(folder)
-    
-    #variation="_".join(variation.split())
-    
     os.system("mkdir "+variation)
     n=0
     for j in user_list: 
@@ -69,47 +47,100 @@ def create_dir(user_list,variation):
     print "total of the files copied", n        
 
 
-#------------------  execution  ------------------- "Eye color"
+def dir_pheno_variation(file_csv,folder_genotype):
+    """ Read the openSNP file with all phenotypes to create
+        the folders with phenotype and insede the dir with 
+        files insede each variations folder. """
 
-fieldnames=open(file_map).readline().split(';')
-fieldnames.sort()
-print "\n\n---------------------------  fieldnames (Phenotypes)\n"
+    fieldnames=open(file_csv).readline().split(';')  #read all phenotypes and sort
+    fieldnames.sort()
 
+    print "\n\n---------------------------  fieldnames (Phenotypes)\n"
 
-for i in fieldnames:
-    print i
+    for i in fieldnames:
+        print i
 
+    p=raw_input("\n---------------------------  Phenotype: ")
+    variations_list=[] 
+    for i in get_dataset(file_csv):
+        if not i[p] in variations_list: 
+            variations_list.append(i[p])
+            print i[p]        
 
+    v=raw_input("\n---------------------------  Variations: ")
+    v=v.split(";")
 
-p=raw_input("\n---------------------------  Phenotype: ")
-variations_list=[] 
-for i in get_dataset():
-    if not i[p] in variations_list: 
-        variations_list.append(i[p])
-        print i[p]        
-
-
-v=raw_input("\n---------------------------  Variations: ")
-v=v.split(";")
-
-print "\n"
-
-os.system("mkdir "+"_".join(p.split()))
-
-
-for i in v:
-    print "Variations: ", i
-    l=get_user( p, i)
-    variation="_".join(i.split())
-    create_dir(l,variation)
-    os.system("mv "+ variation+" "+"_".join(p.split()))    
     print "\n"
 
+    os.system("mkdir "+"_".join(p.split()))
+
+    for i in v:
+        print "Variations: ", i
+        l=get_user( p, i,file_csv)
+        variation="_".join(i.split())
+        create_dir(l,variation,folder_genotype)
+        os.system("mv "+ variation+" "+"_".join(p.split()))    
+        print "\n"
+
+
+if __name__ == '__main__':
+
+    # build option parser:
+    class MyParser(OptionParser):
+        def format_epilog(self, formatter):
+            return self.epilog
+    
+    usage = "usage: python %prog [options] filename and path/folder\n"    
+
+    description = """
+This program allow us parse the .csv that has information about genotype and phenotype. 
+From this information we can create a folder for a phenotype and inside we can have 
+folders with  genotype files for each variations\n"""
+
+    epilog = """
+Input: 
+    file .csv that contains infomation about phenotypes and genotypes for each individual.
+Output:
+    phenotype folder with all variations\n
 
 
 
+    when the program run it will request your preferences. for exemple:
 
 
+----------------------------------  fieldnames (Phenotypes)
+
+...
+ADHD
+Asthma
+Ability to Tan
+...
+
+---------------------------  Phenotype: Asthma
+...
+False
+Allergy induced, mainly when younger
+No
+Chronic Asthma
+slight
+...
+---------------------------  Variations: No;Chronic Asthma;slight
+
+"""
+
+    parser = MyParser(usage, description=description,epilog=epilog)
+    parser.add_option("-f", "--file_csv", dest="file_csv", 
+                      help="file name of the .csv to be parse")
+    parser.add_option("-g","--folder_genotyphe",  dest="folder_genotype", 
+                      help="folder with all genotype files")    
+
+
+    (options, args) = parser.parse_args()
+    if len(sys.argv) != 5:
+        parser.error("incorrect number of arguments. Use -h to help you.")
+    file_csv = options.file_csv
+    folder_genotype = options.folder_genotype   
+    dir_pheno_variation(file_csv, folder_genotype)
 
 
 
