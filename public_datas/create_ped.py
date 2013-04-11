@@ -68,7 +68,7 @@ for i in os.listdir(dir_files_phenotype1):
         sex="2"
         
     else:
-        sex="other"
+        sex="9"
         
     
     try:	
@@ -129,7 +129,7 @@ for i in os.listdir(dir_files_phenotype2):
         sex="2"
        
     else:
-        sex="other"
+        sex="9"
         
     try:
         snps = sn.parse(dir_files_phenotype2+"/"+i)       #take another files
