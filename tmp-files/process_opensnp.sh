@@ -1,45 +1,3 @@
-========
-opengwas
-========
-
-Converting between Genome Wide Association Study (GWAS) file formats
-
-Currently supported formats
-==================
-
-openSNP
--------
-
-* Reading using https://github.com/superbobry/snpy
-
-
-PLINK
------
-
-http://pngu.mgh.harvard.edu/~purcell/plink/
-
-* Writing PED and MAP files
-* Reading PED, BIM, FAM files using https://github.com/fadern/libplinkio
-
-
-HDF5
-----
-
-Convenient for python and matlab
-
-* Reading and Writing using http://www.pytables.org
-
-
-
-Create the files in format plink from openSNP data
-==================================================
-
-
-Use the script process_opensnp.sh that is inside the folder called tmp-files.
-
-
----------------------------------------------  process_opensnp.sh script --------------------------------------------------
-
 # A brief step-by-step to create the plink files from openSNP. 
 # Please, use -h to see information about the programs. 
 # =======================================================
@@ -103,6 +61,4 @@ python ../scripts/plink2hdf5.py filename-plink
 python  chillo/plink-scripts gss2graph.py --inputtxt output_snp_pairs.txt  --h5name filename-plink --outjson filename-plink.json
 
 
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
