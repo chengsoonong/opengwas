@@ -38,14 +38,15 @@ class MapAndPed:
                               'TA', 'TT', 'TG', 'TC',
                               'GA', 'GT', 'GG', 'GC']
         self.Family_ID=1
+        self.Individual_ID=1
         self.chrommosomos=np.array(["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","MT"])        
 
 
 
-    def create_map(self, folders_caso, folders_control):
+    def create_map(self, folders_case, folders_control):
         """Create the .map file"""
-        print time.asctime(),"\nMAP FILE\n"
-        dir_list=folders_caso[:]
+        print "\n\nMAP FILE   (",time.asctime(),")\n"
+        dir_list=folders_case[:]
         dir_list.extend(folders_control)
         files=[]
         file_dir={}
@@ -57,7 +58,7 @@ class MapAndPed:
                  for j in os.listdir(i):   
                     file_dir[j]=i            #dictionari with file:dir
 
-        print "\nReading the files:  \n",file_dir[files[0]]+"/"+files[0],  #parse the first file
+        print "Reading the files:\n\n",file_dir[files[0]]+"/"+files[0],  #parse the first file
         try:
             snps = sn.parse(file_dir[files[0]]+"/"+files[0])#take the first file	        	
             for i in snps:              #initialaze rs_list and map_list with the first file
@@ -96,7 +97,7 @@ class MapAndPed:
 
         map_list = np.sort(map_list, order=['chrom', 'position']) 
         ofile = open(self.outputmap,'w')    # open file for writing
-        print "there are",len(map_list['rs']),"SNPs.\nwrite the",self.outputmap,"file..."
+        print "there are",len(map_list['rs']),"SNPs.\nwriting the",self.outputmap,"file..."
         for i in self.chrommosomos:
             if i in map_list['chrom']:
                 idx = map_list['chrom']==i                                  
@@ -106,10 +107,10 @@ class MapAndPed:
 
 
 
-    def create_ped( self, folders_caso, folders_control):
+    def create_ped( self, folders_case, folders_control):
         """Create the .ped file"""
 
-        print time.asctime(),"\nPED FILE\n"
+        print "\n\n\nPED FILE   (",time.asctime(),")\n"
         handle = csv.DictReader(open(self.outputmap, "r"),
                 fieldnames=["chromosome", "rs","morgans", "position"],
                 delimiter=" ")
@@ -117,12 +118,12 @@ class MapAndPed:
             self.all_rs.append(i["rs"])
         self.all_rs=np.array(self.all_rs)
         ofile = open(self.outputped,'w')    # open file for writing        
-        print "\nReading the file to be CASO(1):\n"    
-        for folder in folders_caso:    
-            self.write_ped( folder, ofile, "1")
-        print "\nReading the file to be CONTROL(2):\n"
+        print "\nReading the file to be cases (affected: 2):\n"    
+        for folder in folders_case:    
+            self.write_ped( folder, ofile, "2")
+        print "\nReading the file to be controls (unaffected: 1):\n"
         for folder in folders_control:
-            self.write_ped(folder, ofile, "2")
+            self.write_ped(folder, ofile, "1")
         ofile.close()
 
 
@@ -143,7 +144,7 @@ class MapAndPed:
             elif "XX" in i:
                 sex="2"       
             else:
-                sex="other"        
+                sex="9"        #sex="other"
             try:
                 snps = sn.parse(dirfilespheno+"/"+i)       #take another files
             except:
@@ -157,14 +158,19 @@ class MapAndPed:
             except:
                 print  "   ERRO 2"
                 continue    
-            print "" 
-            idx = np.flatnonzero(np.in1d(self.all_rs, np.array(all_names)))
+            try:            
+                idx = np.flatnonzero(np.in1d(self.all_rs, np.array(all_names)))
+            except:
+                print  "   ERRO 3"
+                continue    
+            print ""                 
             all_rs_ind_tmp[idx] = np.array(all_gen)
-            outputfile.write( str(self.Family_ID)+" "+ "1 0 0 "+sex+"  "+ pheno+"  ")
+            outputfile.write( str(self.Family_ID)+" "+ str(self.Individual_ID)+" "+"0 0 "+sex+"  "+ pheno+"  ")
             for i in all_rs_ind_tmp:
                     outputfile.write(i+"  ")
             outputfile.write("\n")
             self.Family_ID=self.Family_ID+1
+            self.Individual_ID=self.Individual_ID+1
 
 
 
@@ -174,8 +180,8 @@ class MapAndPed:
         """
         Parse the .ped to avoid more than 2 alleles. 
         """
-
-        print time.asctime(),"\nparsing the",self.outputped,"file ..."
+        print "\n\nPARSE PED  (",time.asctime(),")\n"
+        print "\nparsing the",self.outputped,"file ..."
         #take the file .ped
         ifile_ped = open(self.outputped,'r') #folder_test.ped test_all_files_blue_brown.ped zeros( (3,4) )
         #create a matrix of the zeros to count how much allelos
@@ -214,7 +220,7 @@ class MapAndPed:
         ofile_ped = open(self.outputped_parse,'w')
         ifile_ped = open(self.outputped,'r')   
 
-        print time.asctime(),"writing the",self.outputped_parse,"file ..."
+        print "writing the",self.outputped_parse,"file ..."
         for l in ifile_ped:
             line=np.array(l.split())
             ofile_ped.write(line[0]+" "+line[1]+" "+line[2]+" "+line[3]+" "+line[4]+"  "+line[5]+"  ")    
@@ -234,8 +240,8 @@ class MapAndPed:
         """
         Parse the .ped to avoid more than 2 alleles.
         """
-
-        print time.asctime(),"\nparsing the",self.outputmap ,"file ..."
+        print "\n\nPARSE MAP  (",time.asctime(),")\n"
+        print "\nparsing the",self.outputmap ,"file ..."
         #take the file .map
         dtype = [('chromosome', 'S10'), ('rs', 'S10'), ('morgans', 'S10'),('position', 'S10')]
         map_array = np.genfromtxt(self.outputmap, dtype=dtype, delimiter=" ")
@@ -244,7 +250,7 @@ class MapAndPed:
         idx_del_map = idx_del_map[idx_del_map%2 == 0]
         idx_del_map=idx_del_map/2
         map_array = np.delete(map_array,idx_del_map, axis=0)
-        print time.asctime(),"writing the",self.outputmap_parse ,"file ..."
+        print "writing the",self.outputmap_parse ,"file ..."
         np.savetxt(self.outputmap_parse,map_array,delimiter=' ',fmt='%s',newline='\n')
 
 
@@ -276,7 +282,7 @@ This program allow us create the .map and .ped files to be used in plink.\n"""
 
 For example:
 
-python map_and_ped.py -m filename.map -p filename.ped --caso "folder1 folder2 folder3" --control "folder4 folder5" 
+python map_and_ped.py -m filename.map -p filename.ped --case "folder1 folder2 folder3" --control "folder4 folder5" 
 
     INPUT:  
         "folder1 folder2 folder3"
@@ -290,7 +296,7 @@ python map_and_ped.py -m filename.map -p filename.ped --caso "folder1 folder2 fo
            individual 2 1 has genotype [ C C ]
            but we've already seen [ A ] and [ G ]
 
-python map_and_ped.py -m filename.map -p filename.ped --caso "folder1 folder2 folder3" --control "folder4 folder5" --omp filename-parsed.map --opp filename-parsed.ped
+python map_and_ped.py -m filename.map -p filename.ped --case "folder1 folder2 folder3" --control "folder4 folder5" --omp filename-parsed.map --opp filename-parsed.ped
 
     INPUT:  
         "folder1 folder2 folder3"
@@ -308,8 +314,8 @@ python map_and_ped.py -m filename.map -p filename.ped --caso "folder1 folder2 fo
 """
 
     parser = MyParser(usage, description=description,epilog=epilog)
-    parser.add_option("--caso",  dest="caso", action="store",
-                      help='input  -   folders with the files representing caso. Put the folders inside "". for example: --caso "folder1 folder2 folder3"')
+    parser.add_option("--case",  dest="case", action="store",
+                      help='input  -   folders with the files representing case. Put the folders inside "". for example: --case "folder1 folder2 folder3"')
     parser.add_option("--control", dest="control",   action="store",
                       help='input  -   folders with the files representing control. Put the folders inside "". for example: --control "folder4 folder5 folder6"')
     parser.add_option("-m", "--outfile_map", dest="outfile_map",  action="store",
@@ -330,20 +336,21 @@ python map_and_ped.py -m filename.map -p filename.ped --caso "folder1 folder2 fo
     outfile_ped = options.outfile_ped  
     outfile_map_parse = options.outfile_map_parse
     outfile_ped_parse = options.outfile_ped_parse
-    caso = options.caso.split() 
+    case = options.case.split() 
     control = options.control.split() 
+    
 
     if (outfile_ped_parse == None or outfile_map_parse == None):
  
         mp = MapAndPed(outfile_map, outfile_ped)
-        mp.create_map(caso, control)
-        mp.create_ped(caso, control)
+        mp.create_map(case, control)
+        mp.create_ped(case, control)
 
     else:
 
         mp = MapAndPed(outfile_map, outfile_ped, outfile_map_parse, outfile_ped_parse )
-        mp.create_map(caso, control)
-        mp.create_ped(caso, control)
+        mp.create_map(case, control)
+        mp.create_ped(case, control)
         mp.parse_map_ped()
 
 
