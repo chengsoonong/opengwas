@@ -60,14 +60,14 @@ def dir_pheno_variation(file_csv,folder_genotype):
     for i in fieldnames:
         print i
 
-    p=raw_input("\n---------------------------  Phenotype: ")
+    p=raw_input("\n---------------------------  Choose the Phenotype above: ")
     variations_list=[] 
     for i in get_dataset(file_csv):
         if not i[p] in variations_list: 
             variations_list.append(i[p])
             print i[p]        
 
-    v=raw_input("\n---------------------------  Variations: ")
+    v=raw_input("\n---------------------------  Choose the Variations above (use ';' between them): ")
     v=v.split(";")
 
     print "\n"
