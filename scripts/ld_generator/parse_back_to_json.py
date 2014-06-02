@@ -30,7 +30,7 @@ while a < 25:
 
     snparray = list()
     snpdict = dict()
-    snpdict = jsonparse.snpdict(a) 
+    snpdict = jsonparse.snpdict(a, infile) 
 
     for i in lines:
         thisline = i.split();

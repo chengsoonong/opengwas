@@ -1,8 +1,8 @@
 import json
 from pprint import pprint
 
-def snpdict(n):
-    json_data=open('asthma_opensnp.json')
+def snpdict(n, file):
+    json_data=open(file)
     id_json={}
     data = json.load(json_data)
     for a in data["nodes"]:
